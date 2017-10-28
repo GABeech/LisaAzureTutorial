@@ -1,0 +1,146 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+     
+  },
+  "variables": {
+      "vnetId": "[resourceId('01-Basic','Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+      "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+  },
+  "resources": [
+      {
+          "name": "basicvm01",
+          "type": "Microsoft.Compute/virtualMachines",
+          "apiVersion": "2016-04-30-preview",
+          "location": "eastus",
+          "dependsOn": [
+              "basicvm01-nic"
+          ],
+          "properties": {
+              "osProfile": {
+                  "computerName": "basicvm01",
+                  "adminUsername": "gbeech",
+                  "adminPassword": "YouShouldBeSmarter1!"
+              },
+              "hardwareProfile": {
+                  "vmSize": "Basic_A0"
+              },
+              "storageProfile": {
+                  "imageReference": {
+                      "publisher": "Canonical",
+                      "offer": "UbuntuServer",
+                      "sku": "17.04",
+                      "version": "latest"
+                  },
+                  "osDisk": {
+                      "createOption": "FromImage",
+                      "managedDisk": {
+                          "storageAccountType": "Standard_LRS"
+                      }
+                  },
+                  "dataDisks": []
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', 'basicvm01-nic')]"
+                      }
+                  ]
+              }
+          }
+      },
+      {
+          "name": "basicNetwork",
+          "type": "Microsoft.Network/virtualNetworks",
+          "apiVersion": "2016-12-01",
+          "location": "eastus",
+          "properties": {
+              "addressSpace": {
+                  "addressPrefixes": [
+                      "10.0.0.0/24"
+                  ]
+              },
+              "subnets": [
+                  {
+                      "name": "basicSubnet",
+                      "properties": {
+                          "addressPrefix": "10.0.0.0/24"
+                      }
+                  }
+              ]
+          }
+      },
+      {
+          "name": "basicvm01-nic",
+          "type": "Microsoft.Network/networkInterfaces",
+          "apiVersion": "2016-09-01",
+          "location": "eastus",
+          "dependsOn": [
+              "[concat('Microsoft.Network/virtualNetworks/', 'basicNetwork')]",
+              "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]",
+              "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
+          ],
+          "properties": {
+              "ipConfigurations": [
+                  {
+                      "name": "ipconfig1",
+                      "properties": {
+                          "subnet": {
+                              "id": "[variables('subnetRef')]"
+                          },
+                          "privateIPAllocationMethod": "Dynamic",
+                          "publicIpAddress": {
+                              "id": "[resourceId('01-Basic','Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+                          }
+                      }
+                  }
+              ],
+              "networkSecurityGroup": {
+                  "id": "[resourceId('01-Basic', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+              }
+          }
+      },
+      {
+          "name": "[parameters('publicIpAddressName')]",
+          "type": "Microsoft.Network/publicIpAddresses",
+          "apiVersion": "2017-08-01",
+          "location": "[parameters('location')]",
+          "properties": {
+              "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+          },
+          "sku": {
+              "name": "[parameters('publicIpAddressSku')]"
+          }
+      },
+      {
+          "name": "[parameters('networkSecurityGroupName')]",
+          "type": "Microsoft.Network/networkSecurityGroups",
+          "apiVersion": "2017-06-01",
+          "location": "[parameters('location')]",
+          "properties": {
+              "securityRules": [
+                  {
+                      "name": "default-allow-ssh",
+                      "properties": {
+                          "priority": 1000,
+                          "protocol": "TCP",
+                          "access": "Allow",
+                          "direction": "Inbound",
+                          "sourceAddressPrefix": "*",
+                          "sourcePortRange": "*",
+                          "destinationAddressPrefix": "*",
+                          "destinationPortRange": "22"
+                      }
+                  }
+              ]
+          }
+      }
+  ],
+  "outputs": {
+      "adminUsername": {
+          "type": "string",
+          "value": "[parameters('adminUsername')]"
+      }
+  }
+}
