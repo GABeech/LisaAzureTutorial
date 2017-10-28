@@ -5,8 +5,7 @@
      
   },
   "variables": {
-      "vnetId": "[resourceId('01-Basic','Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-      "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+     
   },
   "resources": [
       {
@@ -78,8 +77,8 @@
           "location": "eastus",
           "dependsOn": [
               "[concat('Microsoft.Network/virtualNetworks/', 'basicNetwork')]",
-              "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]",
-              "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
+              "[concat('Microsoft.Network/publicIpAddresses/', 'basicPublicIp')]",
+              "[concat('Microsoft.Network/networkSecurityGroups/', 'basicNSG')]"
           ],
           "properties": {
               "ipConfigurations": [
@@ -87,7 +86,7 @@
                       "name": "ipconfig1",
                       "properties": {
                           "subnet": {
-                              "id": "[variables('subnetRef')]"
+                              "id": "Microsoft.Network/virtualNetworks/basicNetwork/basicSubnet"
                           },
                           "privateIPAllocationMethod": "Dynamic",
                           "publicIpAddress": {
