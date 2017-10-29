@@ -13,19 +13,28 @@
      "webServerPassword": {
          "type": "securestring",
          "defaultValue": null
+     },
+     "osImage":{
+         "type": "object",
+         "defaultValue": null
      }
   },
   "variables": {
-     "webServerNic": "[concat(parameters('webServerName'),'nic')]"
+     "webServerNic": "[concat(parameters('webServerName'),'nic')]",
+     "numCopies": 2
   },
   "resources": [
       {
-          "name": "[parameters('webServerName')]",
+          "name": "[concat(parameters('webServerName'),copyIndex())]",
           "type": "Microsoft.Compute/virtualMachines",
           "apiVersion": "2016-04-30-preview",
           "location": "[resourceGroup().location]",
+          "copy":{
+              "name": "WebCopy",
+              "count": "[variables('numCopies')]"
+          },
           "dependsOn": [
-              "[variables('webServerNic')]"
+              "[concat(variables('webServerNic'),copyIndex())]"
           ],
           "properties": {
               "osProfile": {
@@ -37,12 +46,7 @@
                   "vmSize": "Basic_A0"
               },
               "storageProfile": {
-                  "imageReference": {
-                      "publisher": "Canonical",
-                      "offer": "UbuntuServer",
-                      "sku": "17.04",
-                      "version": "latest"
-                  },
+                "imageReference": "[parameters('osImage')]",
                   "osDisk": {
                       "createOption": "FromImage",
                       "managedDisk": {
@@ -54,7 +58,7 @@
               "networkProfile": {
                   "networkInterfaces": [
                       {
-                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('webServerNic'))]"
+                          "id": "[concat(resourceId('Microsoft.Network/networkInterfaces', variables('webServerNic')),copyIndex())]"
                       }
                   ]
               }
@@ -82,13 +86,17 @@
           }
       },
       {
-          "name": "[variables('webServerNic')]",
+          "name": "[concat(variables('webServerNic'),copyIndex())]",
           "type": "Microsoft.Network/networkInterfaces",
           "apiVersion": "2016-09-01",
           "location": "[resourceGroup().location]",
+          "copy": {
+              "count": "[variables('numCopies')]",
+              "name": "WebNicCopy"
+          },
           "dependsOn": [
               "[resourceId('Microsoft.Network/virtualNetworks/', 'basicNetwork')]",
-              "[resourceId('Microsoft.Network/publicIpAddresses/', 'basicPublicIp')]"
+              "[concat(resourceId('Microsoft.Network/publicIpAddresses/', 'basicPublicIp'),copyIndex())]"
           ],
           "properties": {
               "ipConfigurations": [
@@ -100,7 +108,7 @@
                           },
                           "privateIPAllocationMethod": "Dynamic",
                           "publicIpAddress": {
-                              "id": "[resourceId('Microsoft.Network/publicIpAddresses', 'basicPublicIp')]"
+                              "id": "[resourceId('Microsoft.Network/publicIpAddresses', concat(parameters('webServerName'),'-BasicPublicIp', copyIndex()))]"
                           }
                       }
                   }
@@ -109,9 +117,13 @@
           }
       },
       {
-          "name": "BasicPublicIp",
+          "name": "[concat(parameters('webServerName'),'-BasicPublicIp', copyIndex())]",
           "type": "Microsoft.Network/publicIpAddresses",
           "apiVersion": "2017-06-01",
+          "copy": {
+              "name": "PublicIPCopy",
+              "count": "[variables('numCopies')]"
+          },
           "location": "[resourceGroup().location]",
           "properties": {
               "publicIpAllocationMethod": "Dynamic",

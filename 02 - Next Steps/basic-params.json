@@ -9,7 +9,15 @@
       "value": "gbeech"
     },
     "webServerName": {
-      "value": "Basic-Web01"
+      "value": "Basic-Web"
+    },
+    "osImage": {
+      "value": {
+        "publisher": "Canonical",
+        "offer": "UbuntuServer",
+        "sku": "17.04",
+        "version": "latest"
+      }
     }
   }
 }
