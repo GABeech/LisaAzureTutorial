@@ -12,7 +12,7 @@
           "name": "basicvm01",
           "type": "Microsoft.Compute/virtualMachines",
           "apiVersion": "2016-04-30-preview",
-          "location": "eastus",
+          "location": "[resourceGroup().location]",
           "dependsOn": [
               "basicvm01-nic"
           ],
@@ -53,7 +53,7 @@
           "name": "basicNetwork",
           "type": "Microsoft.Network/virtualNetworks",
           "apiVersion": "2016-12-01",
-          "location": "eastus",
+          "location": "[resourceGroup().location]",
           "properties": {
               "addressSpace": {
                   "addressPrefixes": [
@@ -74,11 +74,10 @@
           "name": "basicvm01-nic",
           "type": "Microsoft.Network/networkInterfaces",
           "apiVersion": "2016-09-01",
-          "location": "eastus",
+          "location": "[resourceGroup().location]",
           "dependsOn": [
-              "[concat('Microsoft.Network/virtualNetworks/', 'basicNetwork')]",
-              "[concat('Microsoft.Network/publicIpAddresses/', 'basicPublicIp')]",
-              "[concat('Microsoft.Network/networkSecurityGroups/', 'basicNSG')]"
+              "[resourceId('Microsoft.Network/virtualNetworks/', 'basicNetwork')]",
+              "[resourceId('Microsoft.Network/publicIpAddresses/', 'basicPublicIp')]"
           ],
           "properties": {
               "ipConfigurations": [
@@ -86,60 +85,31 @@
                       "name": "ipconfig1",
                       "properties": {
                           "subnet": {
-                              "id": "Microsoft.Network/virtualNetworks/basicNetwork/basicSubnet"
+                              "id": "[concat(resourceId('Microsoft.Network/virtualNetworks','basicNetwork'),'/subnets/basicSubnet')]"
                           },
                           "privateIPAllocationMethod": "Dynamic",
                           "publicIpAddress": {
-                              "id": "[resourceId('01-Basic','Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+                              "id": "[resourceId('Microsoft.Network/publicIpAddresses', 'basicPublicIp')]"
                           }
                       }
                   }
-              ],
-              "networkSecurityGroup": {
-                  "id": "[resourceId('01-Basic', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
-              }
-          }
-      },
-      {
-          "name": "[parameters('publicIpAddressName')]",
-          "type": "Microsoft.Network/publicIpAddresses",
-          "apiVersion": "2017-08-01",
-          "location": "[parameters('location')]",
-          "properties": {
-              "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
-          },
-          "sku": {
-              "name": "[parameters('publicIpAddressSku')]"
-          }
-      },
-      {
-          "name": "[parameters('networkSecurityGroupName')]",
-          "type": "Microsoft.Network/networkSecurityGroups",
-          "apiVersion": "2017-06-01",
-          "location": "[parameters('location')]",
-          "properties": {
-              "securityRules": [
-                  {
-                      "name": "default-allow-ssh",
-                      "properties": {
-                          "priority": 1000,
-                          "protocol": "TCP",
-                          "access": "Allow",
-                          "direction": "Inbound",
-                          "sourceAddressPrefix": "*",
-                          "sourcePortRange": "*",
-                          "destinationAddressPrefix": "*",
-                          "destinationPortRange": "22"
-                      }
-                  }
               ]
+              
           }
+      },
+      {
+          "name": "BasicPublicIp",
+          "type": "Microsoft.Network/publicIpAddresses",
+          "apiVersion": "2017-06-01",
+          "location": "[resourceGroup().location]",
+          "properties": {
+              "publicIpAllocationMethod": "Dynamic",
+              "publicIpAddressVersion": "IPv4"
+          }
+         
       }
+      
   ],
   "outputs": {
-      "adminUsername": {
-          "type": "string",
-          "value": "[parameters('adminUsername')]"
-      }
   }
 }

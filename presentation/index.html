@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Automating Azure</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h3>Automating Azure with Resource Manager Templates</h3>
+					George Beech<br/>
+					Stack Overflow<br/>
+					@GABeech
+				</section>
+				<section>
+					<section>
+						<h3>The Basics</h3>
+						<ul>
+							<li>Azure Basics</li>
+							<ul>
+								<li>Subscriptions</li>
+								<li>Tennants</li>
+								<li>Deployment Models</li>
+							</ul>
+							<li>Deployment Options</li>
+						</ul>
+					</section>
+						<section>Classroom Experience?</section>
+						<section></section>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Deployment</h2>
+						<ul>
+							<li>Classic</li>
+							<li>Resource Manager</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Templated Deployments</h2>
+						<ul>
+							<li>JSON (with some additions)</li>
+							<li>You can use PowerShell or the multiplat azure client</li>
+						</ul>
+						<p>I'll be using powershell today, but you can easily  use the same files with the multiplatform azure client</p>
+					</section>
+					<section>
+						
+							<h3>Template Components</h3>
+							<ul>
+								<li>Template Json File</li>
+								<li>MetaData Json File (optional></li>
+								<li>Parameters Json File (optional)</li>
+							</ul>
+						</section>
+						<section>
+							Template Json files
+							<pre>
+								<code class="hljs" data-trim contenteditable>
+									{
+										"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+										"contentVersion": "1.0.0.0",
+										"parameters": {	},
+										"variables": {},
+										"resources": [],
+										"outputs":[]
+									}
+												
+							</code>
+						</pre>
+						</section>
+						<section>
+							Metadata Json File
+							<pre>
+								<code class="hljs" data-trim contenteditable>
+									{
+										"itemDisplayName": "PostgreSQL 9.3 on Ubuntu VMs",
+										"description": "This template creates a PostgreSQL streaming-replication between a master and one or more slave servers each with 2 striped data disks. The database servers are deployed into a private-only subnet with one publicly accessible jumpbox VM in a DMZ subnet with public IP.",
+										"summary": "PostgreSQL stream-replication with multiple slave servers and a publicly accessible jumpbox VM",
+										"githubUsername": "arsenvlad",
+										"dateUpdated": "2015-04-24"
+								}
+							</code>
+						</pre>
+						</section>
+						<section>
+							Parameter JSON File
+							<pre>
+								<code class="hljs" data-trim contenteditable>
+									{
+										"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+										"contentVersion": "1.0.0.0",
+										"parameters": {
+											"webServerPassword": {
+												"value": "YouShouldBeSmarter1!"
+											},
+											"webServerUserName": {
+												"value": "gbeech"
+											},
+											"webServerName": {
+												"value": "Basic-Web01"
+											}
+										}
+									}
+							</code>
+						</pre>
+						</section>
+						
+				</section>	
+				<section>
+					Let's Take a look at what these actually look like
+				</section>
+				<section>
+					<section>
+						So How Do I actually Use these Json Files? 
+						<p class="fragment">
+							Log Into Your Azure account</pre>
+						</p>
+						<p class="fragment">Make sure you have the right Subscription</p>
+						<p class="fragment">Create Resource Group</p>
+						<p class="fragment">Deploy</p>
+					</section>
+				</section>
+				<section>
+					Ok, So what does a deployment look like?
+					<p class="fragment">Yes, that means demo time. May God Have Mercy On our Souls</p>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>

@@ -2,25 +2,36 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-     
+     "webServerName": {
+         "type": "string",
+         "defaultValue": null
+     },
+     "webServerUserName": {
+         "type": "string",
+         "defaultValue": null
+     },
+     "webServerPassword": {
+         "type": "securestring",
+         "defaultValue": null
+     }
   },
   "variables": {
-     
+     "webServerNic": "[concat(parameters('webServerName'),'nic')]"
   },
   "resources": [
       {
-          "name": "basicvm01",
+          "name": "[parameters('webServerName')]",
           "type": "Microsoft.Compute/virtualMachines",
           "apiVersion": "2016-04-30-preview",
           "location": "[resourceGroup().location]",
           "dependsOn": [
-              "basicvm01-nic"
+              "[variables('webServerNic')]"
           ],
           "properties": {
               "osProfile": {
-                  "computerName": "basicvm01",
-                  "adminUsername": "gbeech",
-                  "adminPassword": "YouShouldBeSmarter1!"
+                  "computerName": "[parameters('webServerName')]",
+                  "adminUsername": "[parameters('webServerUserName')]",
+                  "adminPassword": "[parameters('webServerPassword')]"
               },
               "hardwareProfile": {
                   "vmSize": "Basic_A0"
@@ -43,7 +54,7 @@
               "networkProfile": {
                   "networkInterfaces": [
                       {
-                          "id": "[resourceId('Microsoft.Network/networkInterfaces', 'basicvm01-nic')]"
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('webServerNic'))]"
                       }
                   ]
               }
@@ -71,7 +82,7 @@
           }
       },
       {
-          "name": "basicvm01-nic",
+          "name": "[variables('webServerNic')]",
           "type": "Microsoft.Network/networkInterfaces",
           "apiVersion": "2016-09-01",
           "location": "[resourceGroup().location]",
@@ -107,87 +118,7 @@
               "publicIpAddressVersion": "IPv4"
           }
          
-      },
-      {
-        "name": "basicvm02",
-        "type": "Microsoft.Compute/virtualMachines",
-        "apiVersion": "2016-04-30-preview",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "basicvm02-nic"
-        ],
-        "properties": {
-            "osProfile": {
-                "computerName": "basicvm02",
-                "adminUsername": "gbeech",
-                "adminPassword": "YouShouldBeSmarter1!"
-            },
-            "hardwareProfile": {
-                "vmSize": "Basic_A0"
-            },
-            "storageProfile": {
-                "imageReference": {
-                    "publisher": "Canonical",
-                    "offer": "UbuntuServer",
-                    "sku": "17.04",
-                    "version": "latest"
-                },
-                "osDisk": {
-                    "createOption": "FromImage",
-                    "managedDisk": {
-                        "storageAccountType": "Standard_LRS"
-                    }
-                },
-                "dataDisks": []
-            },
-            "networkProfile": {
-                "networkInterfaces": [
-                    {
-                        "id": "[resourceId('Microsoft.Network/networkInterfaces', 'basicvm02-nic')]"
-                    }
-                ]
-            }
-        }
-    },
-    
-    {
-        "name": "basicvm02-nic",
-        "type": "Microsoft.Network/networkInterfaces",
-        "apiVersion": "2016-09-01",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "[resourceId('Microsoft.Network/virtualNetworks/', 'basicNetwork')]",
-            "[resourceId('Microsoft.Network/publicIpAddresses/', 'basicPublicIp02')]"
-        ],
-        "properties": {
-            "ipConfigurations": [
-                {
-                    "name": "ipconfig1",
-                    "properties": {
-                        "subnet": {
-                            "id": "[concat(resourceId('Microsoft.Network/virtualNetworks','basicNetwork'),'/subnets/basicSubnet')]"
-                        },
-                        "privateIPAllocationMethod": "Dynamic",
-                        "publicIpAddress": {
-                            "id": "[resourceId('Microsoft.Network/publicIpAddresses', 'basicPublicIp02')]"
-                        }
-                    }
-                }
-            ]
-            
-        }
-    },
-    {
-        "name": "BasicPublicIp02",
-        "type": "Microsoft.Network/publicIpAddresses",
-        "apiVersion": "2017-06-01",
-        "location": "[resourceGroup().location]",
-        "properties": {
-            "publicIpAllocationMethod": "Dynamic",
-            "publicIpAddressVersion": "IPv4"
-        }
-       
-    }
+      }
       
   ],
   "outputs": {
